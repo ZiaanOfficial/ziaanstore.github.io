@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZiaanStore</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e293b;
+            --accent: #f8fafc;
+            --highlight: #38bdf8;
+            --gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --curve: 24px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: var(--secondary);
+            color: var(--accent);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        header {
+            background: var(--gradient);
+            padding: 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom-left-radius: var(--curve);
+            border-bottom-right-radius: var(--curve);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 1s ease-in-out;
+            position: relative;
+        }
+        
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: white;
+            transform: scaleX(0);
+            transform-origin: right;
+            animation: expandLine 1.5s ease-in-out 0.5s forwards;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1.2rem;
+            border-radius: 9999px;
+            transition: var(--transition);
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+        }
+        
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .about-container {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: var(--curve);
+            padding: 3rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .about-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+            z-index: -1;
+        }
+        
+        .about-title {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, var(--accent), var(--highlight));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .about-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--highlight);
+            border-radius: 2px;
+        }
+        
+        .trust-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .trust-item {
+            background: rgba(56, 189, 248, 0.1);
+            border-radius: var(--curve);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            min-width: 180px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            transition: var(--transition);
+        }
+        
+        .trust-item:hover {
+            transform: translateY(-5px);
+            background: rgba(56, 189, 248, 0.2);
+        }
+        
+        .trust-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--highlight);
+            line-height: 1;
+        }
+        
+        .trust-label {
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+        
+        .about-content {
+            max-width: 800px;
+            line-height: 1.8;
+            text-align: center;
+            font-size: 1.1rem;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease-in-out 0.5s forwards;
+        }
+        
+        .social-container {
+            background: rgba(30, 41, 59, 0.6);
+            transform: perspective(1000px) rotateX(5deg);
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+            border-radius: var(--curve);
+            padding: 3rem 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .social-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            background: linear-gradient(to right, var(--accent), var(--highlight));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .social-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            text-decoration: none;
+            color: var(--accent);
+            padding: 2rem;
+            border-radius: var(--curve);
+            transition: var(--transition);
+            width: 220px;
+            background: rgba(37, 99, 235, 0.2);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .social-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.3) 0%, transparent 100%);
+            z-index: -1;
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .social-link:hover {
+            transform: translateY(-5px) scale(1.02);
+            animation: pulse 1s infinite;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            background: rgba(37, 99, 235, 0.3);
+        }
+        
+        .social-link:hover::before {
+            opacity: 1;
+        }
+        
+        .social-icon {
+            width: 60px;
+            height: 60px;
+            fill: var(--highlight);
+            transition: var(--transition);
+        }
+        
+        .social-link:hover .social-icon {
+            fill: var(--accent);
+            transform: scale(1.1);
+        }
+        
+        .social-text {
+            font-weight: 600;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+        
+        .social-link:hover .social-text {
+            color: var(--highlight);
+        }
+        
+        footer {
+            background: var(--gradient);
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: auto;
+            border-top-left-radius: var(--curve);
+            border-top-right-radius: var(--curve);
+        }
+        
+        .footer-text {
+            color: white;
+            font-weight: 500;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes expandLine {
+            from { transform: scaleX(0); transform-origin: right; }
+            to { transform: scaleX(1); transform-origin: left; }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(56, 189, 248, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+        }
+        
+        /* Information Page Styles */
+        .info-container {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: var(--curve);
+            padding: 3rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .info-card {
+            background: rgba(56, 189, 248, 0.1);
+            border-radius: var(--curve);
+            overflow: hidden;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .info-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .info-card-content {
+            padding: 1.5rem;
+        }
+
+        .info-card-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        .info-date {
+            color: var(--highlight);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-excerpt {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.95rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal-content {
+            background: var(--secondary);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: var(--curve);
+            width: 80%;
+            max-width: 800px;
+            position: relative;
+        }
+
+        .close {
+            color: #aaa;
+            position: absolute;
+            right: 1.5rem;
+            top: 1rem;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            margin: 1rem 0;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .about-container, .social-container {
+                padding: 2rem 1.5rem;
+                margin: 1rem 0;
+            }
+            
+            .about-title {
+                font-size: 2rem;
+            }
+            
+            .social-title {
+                font-size: 2rem;
+            }
+            
+            .social-link {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">ZIAANSTORE</div>
+            <div class="nav-links">
+                <a href="#" class="nav-link" data-page="about">About</a>
+                <a href="#" class="nav-link" data-page="social">Social Media</a>
+                <a href="#" class="nav-link" data-page="info">Information</a>
+            </div>
+        </nav>
+    </header>
+    
+    <main>
+        <section id="about" class="page active">
+            <div class="about-container">
+                <h1 class="about-title">ZIAANSTORE</h1>
+                <div class="trust-indicators">
+                    <div class="trust-item">
+                        <div class="trust-number">1000+</div>
+                        <div class="trust-label">Pelanggan Puas</div>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-number">24/7</div>
+                        <div class="trust-label">Support Online</div>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-number">100%</div>
+                        <div class="trust-label">Transaksi Aman</div>
+                    </div>
+                </div>
+                <p class="about-content">
+                    Sebagai toko digital terpercaya sejak 2023, ZiaanStore telah membantu ribuan pelanggan mendapatkan akun game dan layanan top up dengan aman dan cepat.
+                    
+                    Keunggulan kami:
+                    • Proses transaksi instan (1-5 menit)
+                    • Garansi 100% uang kembali jika ada masalah
+                    • Support CS ramah 24 jam
+                    • Harga termurah dengan kualitas premium
+                    • Metode pembayaran lengkap dan aman
+                    
+                    Setiap transaksi dijamin keaslian produknya dan dilengkapi invoice resmi. Pelanggan adalah prioritas utama kami, itulah mengapa rating kepuasan pelanggan kami konsisten di atas 98%.
+                </p>
+            </div>
+        </section>
+        
+        <section id="social" class="page">
+            <div class="social-container">
+                <h2 class="social-title">Contact Us</h2>
+                <div class="social-links">
+                    <a href="https://wa.me/6288905833255" class="social-link" target="_blank" rel="noopener noreferrer">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-3 12H7v-2h10v2zm0-3H7V9h10v2zm0-3H7V6h10v2z"/>
+                        </svg>
+                        <span class="social-text">WhatsApp</span>
+                    </a>
+                    
+                    <a href="https://www.instagram.com/ziaanstore/" class="social-link" target="_blank" rel="noopener noreferrer">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        </svg>
+                        <span class="social-text">Instagram</span>
+                    </a>
+                    
+                    <a href="https://chat.whatsapp.com/YOUR_GROUP_LINK" class="social-link" target="_blank" rel="noopener noreferrer">
+                        <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-3 12H7v-2h10v2zm0-3H7V9h10v2zm0-3H7V6h10v2z"/>
+                        </svg>
+                        <span class="social-text">Market Ziaan - AllGame</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="info" class="page">
+            <div class="info-container">
+                <h1 class="info-title">Latest Updates</h1>
+                <div class="info-grid">
+                    <div class="info-card" onclick="showInfoDetail('info1')">
+                        <img src="1.jpg" alt="News 1" class="info-image">
+                        <div class="info-card-content">
+                            <h3 class="info-card-title">Waspada Clone Dan Penipuan</h3>
+                            <div class="info-date">Posted: 15 Agustus 2025</div>
+                            <div class="info-excerpt">Waspada Penipuan Mengatasnamakan ZiaanStore...</div>
+                        </div>
+                    </div>
+                    <div class="info-card" onclick="showInfoDetail('info2')">
+                        <img src="berita2.png" alt="News 2" class="info-image">
+                        <div class="info-card-content">
+                            <h3 class="info-card-title">Special Promotion</h3>
+                            <div class="info-date">Posted: 1 June 2023</div>
+                            <div class="info-excerpt">Limited time discounts available now...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="info-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title"></h2>
+            <div id="modal-date" class="info-date"></div>
+            <img id="modal-image" src="" alt="" class="modal-image">
+            <p id="modal-description"></p>
+        </div>
+    </div>
+    
+    <footer>
+        <p class="footer-text">© 2023 ZiaanStore. All Rights Reserved.</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function activatePage(pageId) {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+                document.getElementById(pageId).classList.add('active');
+                document.querySelector(`.nav-link[data-page="${pageId}"]`).classList.add('active');
+            }
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    activatePage(this.getAttribute('data-page'));
+                });
+            });
+
+            // Initialize with about page if no hash
+            if (!window.location.hash) {
+                activatePage('about');
+            } else {
+                const pageId = window.location.hash.substring(1);
+                if (document.getElementById(pageId)) {
+                    activatePage(pageId);
+                }
+            }
+        });
+    </script>
+    
+    <div class="loader">
+        <div class="loader-spinner"></div>
+    </div>
+    
+    <script>
+        // Counter animation
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start) + '+';
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+        
+        // Information modal functions
+        function showInfoDetail(id) {
+            const modal = document.getElementById('info-modal');
+            const title = document.getElementById('modal-title');
+            const date = document.getElementById('modal-date');
+            const image = document.getElementById('modal-image');
+            const desc = document.getElementById('modal-description');
+
+            // In a real implementation, you would fetch this data from a database or JSON
+            const infoData = {
+                'info1': {
+                    title: 'Waspada Clone Dan Penipuan',
+                    date: 'Posted: 15 Agustus 2025',
+                    image: '1.jpg',
+                    description: 'ZiaanStore mengeluarkan himbauan resmi kepada seluruh pelanggan untuk mengantisipasi maraknya akun palsu yang mengatasnamakan ZiaanStore.
+Melalui pernyataan resminya, ZiaanStore menegaskan bahwa pihaknya hanya memiliki tiga kanal resmi, yaitu WhatsApp 0856-9104-6873, Instagram @ziaanstore, dan website ziaanofficial.github.io.
+Pelanggan diminta untuk selalu memverifikasi kebenaran informasi sebelum melakukan transaksi.'
+                },
+                'info2': {
+                    title: 'Special Promotion',
+                    date: 'Posted: 1 June 2023',
+                    image: 'berita2.png',
+                    description: 'For the month of June, we are offering special discounts on all top-up services. Get 10% bonus credit on every purchase over 100k. Promotion valid until June 30th.'
+                }
+            };
+
+            const data = infoData[id];
+            title.textContent = data.title;
+            date.textContent = data.date;
+            image.src = data.image;
+            image.alt = data.title;
+            desc.textContent = data.description;
+
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('info-modal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside content
+        window.onclick = function(event) {
+            const modal = document.getElementById('info-modal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Start counter when page loads
+        window.addEventListener('load', function() {
+            animateValue("customerCount", 0, 284, 2000);
+            setTimeout(function() {
+                document.querySelector('.loader').style.opacity = '0';
+                setTimeout(function() {
+                    document.querySelector('.loader').style.display = 'none';
+                }, 500);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
